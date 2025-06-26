@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hardware Stock Manager</title>
-
-  <!-- ✅ Cache-busting added below -->
   <link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
@@ -29,32 +27,38 @@
     </table>
   </div>
 
-  <!-- ✅ Cache-busting added below -->
-
+  <!-- ✅ Firebase Integration -->
   <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      deleteDoc,
+      doc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyBbnsRkO-vDFENo0bvlRhz2mWUx__c_m80",
-    authDomain: "hardwarestock-84447.firebaseapp.com",
-    projectId: "hardwarestock-84447",
-    storageBucket: "hardwarestock-84447.firebasestorage.app",
-    messagingSenderId: "240781950352",
-    appId: "1:240781950352:web:2c58f6ee22b5828ecf0715",
-    measurementId: "G-47W205FW1S"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbnsRkO-vDFENo0bvlRhz2mWUx__c_m80",
+      authDomain: "hardwarestock-84447.firebaseapp.com",
+      projectId: "hardwarestock-84447",
+      storageBucket: "hardwarestock-84447.firebasestorage.app",
+      messagingSenderId: "240781950352",
+      appId: "1:240781950352:web:2c58f6ee22b5828ecf0715",
+      measurementId: "G-47W205FW1S"
+    };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Make db & Firestore methods available globally to script.js
+    window.db = db;
+    window.firestoreTools = { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp };
+  </script>
+
+  <!-- ✅ Your app logic -->
   <script src="script.js?v=2"></script>
 </body>
-<h1>MOMIN</h1>
 </html>

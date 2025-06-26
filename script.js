@@ -1,5 +1,6 @@
-// Firestore initialization (already in your index.html with firebaseConfig)
-const db = firebase.firestore();
+// Access the Firestore setup from index.html
+const db = window.db;
+const { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } = window.firestoreTools;
 
 const form = document.getElementById("stock-form");
 const nameInput = document.getElementById("item-name");
@@ -7,7 +8,7 @@ const qtyInput = document.getElementById("item-qty");
 const table = document.getElementById("stock-table");
 
 // Add item to Firestore
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const name = nameInput.value.trim();
@@ -15,54 +16,54 @@ form.addEventListener("submit", (e) => {
 
   if (!name || isNaN(qty) || qty <= 0) return;
 
-  db.collection("stock").add({
-    name: name,
-    qty: qty,
-    timestamp: new Date()
-  }).then(() => {
+  try {
+    await addDoc(collection(db, "stock"), {
+      name: name,
+      qty: qty,
+      timestamp: serverTimestamp()
+    });
     nameInput.value = "";
     qtyInput.value = "";
-    loadStock(); // reload after add
-  }).catch((error) => {
+    loadStock(); // Refresh table
+  } catch (error) {
     console.error("Error adding item:", error);
-  });
+  }
 });
 
-// Load stock from Firestore and display in table
-function loadStock() {
+// Load stock from Firestore and display
+async function loadStock() {
   table.innerHTML = "";
-  db.collection("stock").orderBy("timestamp", "desc").get()
-    .then((snapshot) => {
-      snapshot.forEach((doc) => {
-        const item = doc.data();
-        const row = document.createElement("tr");
+  try {
+    const snapshot = await getDocs(collection(db, "stock"));
+    snapshot.forEach((docSnap) => {
+      const item = docSnap.data();
+      const row = document.createElement("tr");
 
-        row.innerHTML = `
-          <td>${item.name}</td>
-          <td>${item.qty}</td>
-          <td>
-            <button onclick="deleteItem('${doc.id}')" class="delete-btn">Delete</button>
-          </td>
-        `;
-
-        table.appendChild(row);
-      });
-    }).catch((error) => {
-      console.error("Error loading stock:", error);
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>
+          <button onclick="deleteItem('${docSnap.id}')" class="delete-btn">Delete</button>
+        </td>
+      `;
+      table.appendChild(row);
     });
-}
-
-// Delete item by ID from Firestore
-function deleteItem(id) {
-  if (confirm("Delete this item?")) {
-    db.collection("stock").doc(id).delete()
-      .then(() => {
-        loadStock(); // reload after delete
-      }).catch((error) => {
-        console.error("Error deleting item:", error);
-      });
+  } catch (error) {
+    console.error("Error loading stock:", error);
   }
 }
 
-// Load on page open
+// Delete item from Firestore
+async function deleteItem(id) {
+  if (confirm("Delete this item?")) {
+    try {
+      await deleteDoc(doc(db, "stock", id));
+      loadStock();
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    }
+  }
+}
+
+// Load stock when page loads
 window.onload = loadStock;
