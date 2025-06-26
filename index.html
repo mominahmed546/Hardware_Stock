@@ -27,7 +27,7 @@
     </table>
   </div>
 
-  <!-- ✅ Firebase Integration -->
+  <!-- ✅ Firebase Firestore Integration (v9 Modular SDK) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
     import {
@@ -53,12 +53,18 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Make db & Firestore methods available globally to script.js
+    // ✅ Make available globally to script.js
     window.db = db;
-    window.firestoreTools = { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp };
+    window.firestoreTools = {
+      collection,
+      addDoc,
+      getDocs,
+      deleteDoc,
+      doc,
+      serverTimestamp
+    };
   </script>
 
-  <!-- ✅ Your app logic -->
   <script src="script.js?v=2"></script>
 </body>
 </html>
