@@ -1,16 +1,16 @@
-// ✅ Import Firebase modules directly in script.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import {
   getFirestore,
   collection,
-  addDoc,
   getDocs,
+  addDoc,
+  updateDoc,
   deleteDoc,
   doc,
-  serverTimestamp
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 
-// ✅ Firebase config
+// ✅ Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBbnsRkO-vDFENo0bvlRhz2mWUx__c_m80",
   authDomain: "hardwarestock-84447.firebaseapp.com",
@@ -18,72 +18,93 @@ const firebaseConfig = {
   storageBucket: "hardwarestock-84447.firebasestorage.app",
   messagingSenderId: "240781950352",
   appId: "1:240781950352:web:2c58f6ee22b5828ecf0715",
-  measurementId: "G-47W205FW1S"
+  measurementId: "G-47W205FW1S",
 };
 
-// ✅ Initialize Firebase and Firestore
+// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ✅ DOM elements
+// ✅ Form & DOM elements
 const form = document.getElementById("stock-form");
 const nameInput = document.getElementById("item-name");
 const qtyInput = document.getElementById("item-qty");
+const purchaseInput = document.getElementById("item-purchase");
+const saleInput = document.getElementById("item-sale");
 const table = document.getElementById("stock-table");
 
-// ✅ Add item to Firestore
+// ✅ Add or Update Item
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const name = nameInput.value.trim();
+
+  const name = nameInput.value.trim().toLowerCase();
   const qty = parseInt(qtyInput.value);
+  const purchaseRate = parseFloat(purchaseInput.value);
+  const saleRate = parseFloat(saleInput.value);
 
-  if (!name || isNaN(qty) || qty <= 0) return;
+  if (!name || isNaN(qty) || isNaN(purchaseRate) || isNaN(saleRate)) return;
 
-  try {
-    await addDoc(collection(db, "stock"), {
+  const stockRef = collection(db, "stock");
+  const snapshot = await getDocs(stockRef);
+
+  let existingDoc = null;
+
+  snapshot.forEach((docItem) => {
+    const data = docItem.data();
+    if (data.name.toLowerCase() === name) {
+      existingDoc = { id: docItem.id, data };
+    }
+  });
+
+  if (existingDoc) {
+    const newQty = existingDoc.data.qty + qty;
+    await updateDoc(doc(db, "stock", existingDoc.id), {
+      qty: newQty
+    });
+  } else {
+    await addDoc(stockRef, {
       name,
       qty,
+      purchaseRate,
+      saleRate,
       timestamp: serverTimestamp()
     });
-    nameInput.value = "";
-    qtyInput.value = "";
-    loadStock();
-  } catch (error) {
-    console.error("Error adding item:", error);
   }
+
+  form.reset();
+  loadStock();
 });
 
-// ✅ Load and render stock
+// ✅ Load Items
 async function loadStock() {
   table.innerHTML = "";
-  try {
-    const snapshot = await getDocs(collection(db, "stock"));
-    snapshot.forEach((docItem) => {
-      const item = docItem.data();
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${item.name}</td>
-        <td>${item.qty}</td>
-        <td><button onclick="deleteItem('${docItem.id}')" class="delete-btn">Delete</button></td>
-      `;
-      table.appendChild(row);
-    });
-  } catch (error) {
-    console.error("Error loading stock:", error);
-  }
+  const stockRef = collection(db, "stock");
+  const snapshot = await getDocs(stockRef);
+
+  snapshot.forEach((docSnap) => {
+    const item = docSnap.data();
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.qty}</td>
+      <td>${item.purchaseRate}</td>
+      <td>${item.saleRate}</td>
+      <td>
+        <button onclick="deleteItem('${docSnap.id}')" class="delete-btn">Delete</button>
+      </td>
+    `;
+
+    table.appendChild(row);
+  });
 }
 
-// ✅ Delete item
-async function deleteItem(id) {
+// ✅ Delete
+window.deleteItem = async (id) => {
   if (confirm("Are you sure you want to delete this item?")) {
-    try {
-      await deleteDoc(doc(db, "stock", id));
-      loadStock();
-    } catch (error) {
-      console.error("Error deleting item:", error);
-    }
+    await deleteDoc(doc(db, "stock", id));
+    loadStock();
   }
-}
+};
 
-// ✅ Load on start
 window.onload = loadStock;

@@ -9,9 +9,12 @@
 <body>
   <div class="container">
     <h1>Hardware Stock Management</h1>
+
     <form id="stock-form">
       <input type="text" id="item-name" placeholder="Item Name" required />
       <input type="number" id="item-qty" placeholder="Quantity" required />
+      <input type="number" id="item-purchase" placeholder="Purchase Rate" required />
+      <input type="number" id="item-sale" placeholder="Sale Rate" required />
       <button type="submit">Add Item</button>
     </form>
 
@@ -20,6 +23,8 @@
         <tr>
           <th>Item</th>
           <th>Quantity</th>
+          <th>Purchase Rate</th>
+          <th>Sale Rate</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -27,46 +32,7 @@
     </table>
   </div>
 
-  <!-- ✅ Firebase SDK and Firestore Setup -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      getDocs,
-      deleteDoc,
-      doc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBbnsRkO-vDFENo0bvlRhz2mWUx__c_m80",
-      authDomain: "hardwarestock-84447.firebaseapp.com",
-      projectId: "hardwarestock-84447",
-      storageBucket: "hardwarestock-84447.firebasestorage.app",
-      messagingSenderId: "240781950352",
-      appId: "1:240781950352:web:2c58f6ee22b5828ecf0715",
-      measurementId: "G-47W205FW1S"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // ✅ Make Firestore tools global for script.js
-    window.db = db;
-    window.firestoreTools = {
-      collection,
-      addDoc,
-      getDocs,
-      deleteDoc,
-      doc,
-      serverTimestamp
-    };
-  </script>
-
-  <!-- ✅ Your main logic file -->
-  <script type="module" src="script.js?v=3"></script>
-
+  <!-- ✅ Firebase + App JS -->
+  <script type="module" src="script.js?v=2"></script>
 </body>
 </html>
