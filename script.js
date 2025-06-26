@@ -108,3 +108,30 @@ window.deleteItem = async (id) => {
 };
 
 window.onload = loadStock;
+// ---------------- Billing Logic ----------------
+const billingForm = document.getElementById("billing-form");
+const billOutput = document.getElementById("bill-output");
+
+billingForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const item = document.getElementById("bill-item").value.trim();
+  const date = document.getElementById("bill-date").value;
+  const rate = parseFloat(document.getElementById("bill-rate").value);
+  const qty = parseInt(document.getElementById("bill-qty").value);
+
+  if (!item || !date || isNaN(rate) || isNaN(qty) || qty <= 0 || rate <= 0) return;
+
+  const total = rate * qty;
+
+  billOutput.innerHTML = `
+    <h3>Bill Summary</h3>
+    <p><strong>Item:</strong> ${item}</p>
+    <p><strong>Date:</strong> ${date}</p>
+    <p><strong>Rate:</strong> ${rate}</p>
+    <p><strong>Quantity:</strong> ${qty}</p>
+    <p><strong>Total:</strong> Rs. ${total}</p>
+  `;
+
+  billingForm.reset();
+});

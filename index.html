@@ -32,6 +32,20 @@
     </table>
   </div>
 
+<hr>
+<h2>Billing Section</h2>
+<form id="billing-form">
+  <input type="text" id="bill-item" placeholder="Item Name" required />
+  <input type="date" id="bill-date" required />
+  <input type="number" id="bill-rate" placeholder="Rate" required />
+  <input type="number" id="bill-qty" placeholder="Quantity" required />
+  <button type="submit">Generate Bill</button>
+</form>
+
+<div id="bill-output"></div>
+
+
+
   <!-- ✅ Firebase + App JS -->
   <script type="module" src="script.js?v=2"></script>
 </body>
