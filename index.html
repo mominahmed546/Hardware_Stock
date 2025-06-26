@@ -27,7 +27,7 @@
     </table>
   </div>
 
-  <!-- ✅ Firebase Firestore Integration (v9 Modular SDK) -->
+  <!-- ✅ Firebase SDK and Firestore Setup -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
     import {
@@ -53,7 +53,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ✅ Make available globally to script.js
+    // ✅ Make Firestore tools global for script.js
     window.db = db;
     window.firestoreTools = {
       collection,
@@ -65,6 +65,7 @@
     };
   </script>
 
+  <!-- ✅ Your main logic file -->
   <script src="script.js?v=2"></script>
 </body>
 </html>
