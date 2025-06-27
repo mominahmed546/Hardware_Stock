@@ -3,88 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Stock & Billing Manager</title>
-  <link rel="stylesheet" href="style.css?v=3" />
+  <title>Hardware Stock Manager</title>
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
   <div class="container">
-    <h1>Stock & Billing Manager</h1>
+    <h1>Hardware Stock Management</h1>
 
-    <section>
-      <h2>Add Stock Item</h2>
-      <form id="stock-form">
-        <input type="text" id="item-name" placeholder="Item Name" required />
-        <input type="number" id="purchase-rate" placeholder="Purchase Rate" required />
-        <input type="number" id="sale-rate" placeholder="Sale Rate" required />
-        <input type="number" id="quantity" placeholder="Quantity" required />
-        <button type="submit">Add/Update Item</button>
-      </form>
-    </section>
+    <form id="stock-form">
+      <input type="text" id="item-name" placeholder="Item Name" required />
+      <input type="number" id="item-qty" placeholder="Quantity" required />
+      <input type="number" id="item-purchase" placeholder="Purchase Rate" required />
+      <input type="number" id="item-sale" placeholder="Sale Rate" required />
+      <button type="submit">Add Item</button>
+    </form>
 
-    <section>
-      <h2>Current Stock</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>Purchase Rate</th>
-            <th>Sale Rate</th>
-            <th>Qty</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="stock-table"></tbody>
-      </table>
-    </section>
-
-    <section>
-      <h2>Billing</h2>
-      <form id="billing-form">
-        <select id="bill-item-name" required></select>
-        <input type="number" id="bill-qty" placeholder="Quantity" required />
-        <button type="submit">Generate Bill</button>
-      </form>
-      <div id="bill-output" class="bill"></div>
-    </section>
-
-    <section>
-      <h2>Sales History</h2>
-      <input type="date" id="filter-date" />
-      <button onclick="loadSalesHistory()">Filter</button>
-      <table>
-        <thead>
-          <tr><th>Date</th><th>Item</th><th>Qty</th><th>Total</th></tr>
-        </thead>
-        <tbody id="sales-history"></tbody>
-      </table>
-    </section>
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Purchase Rate</th>
+          <th>Sale Rate</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="stock-table"></tbody>
+    </table>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import {
-      getFirestore, collection, getDocs, addDoc, doc,
-      updateDoc, deleteDoc, onSnapshot, query, where, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+<hr>
+<h2>Billing Section</h2>
+<form id="billing-form">
+  <input type="text" id="bill-item" placeholder="Item Name" required />
+  <input type="date" id="bill-date" required />
+  <input type="number" id="bill-rate" placeholder="Rate" required />
+  <input type="number" id="bill-qty" placeholder="Quantity" required />
+  <button type="submit">Generate Bill</button>
+</form>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBbnsRkO-vDFENo0bvlRhz2mWUx__c_m80",
-      authDomain: "hardwarestock-84447.firebaseapp.com",
-      projectId: "hardwarestock-84447",
-      storageBucket: "hardwarestock-84447.appspot.com",
-      messagingSenderId: "240781950352",
-      appId: "1:240781950352:web:2c58f6ee22b5828ecf0715",
-      measurementId: "G-47W205FW1S"
-    };
+<div id="bill-output"></div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    window.db = db;
-    window.firestore = {
-      collection, getDocs, addDoc, doc, updateDoc,
-      deleteDoc, onSnapshot, query, where, serverTimestamp
-    };
-  </script>
-  <script type="module" src="script.js?v=3"></script>
+
+
+  <!-- ✅ Firebase + App JS -->
+  <script type="module" src="script.js?v=2"></script>
 </body>
 </html>
