@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Stock & Billing Manager</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body>
   <div class="container">
@@ -40,10 +40,8 @@
     <section>
       <h2>Billing</h2>
       <form id="billing-form">
-        <select id="bill-item-name" required>
-          <option value="">Select Item</option>
-        </select>
-        <input type="number" id="bill-qty" placeholder="Quantity" required />
+        <div id="bill-items"></div>
+        <button type="button" id="add-bill-item">+ Add Line Item</button>
         <button type="submit">Generate Bill</button>
       </form>
       <div id="bill-output" class="bill"></div>
@@ -64,7 +62,9 @@
 
   <!-- Firebase Config -->
   <script type="module" src="firebase-config.js"></script>
-  <!-- Main Logic -->
-  <script type="module" src="script.js"></script>
+  <!-- jsPDF library for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-/3NyhDYevOnIe6s1n81E6zEZLES5k0Np7a+tEIGfhO0uR6NiItFzp3dnv8Z70dFVefUz9wL//pIyXQY1Bw6Z0g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Main Logic (with PDF support) -->
+  <script type="module" src="script.js?v=4"></script>
 </body>
 </html>
