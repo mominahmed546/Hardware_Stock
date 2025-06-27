@@ -1,110 +1,172 @@
-// Firebase setup (already initialized in index.html)
+// Import Firebase modules
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
-  query,
-  where,
-  orderBy,
-  serverTimestamp,
+  collection, getDocs, addDoc, doc, updateDoc,
+  deleteDoc, serverTimestamp, query, where
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+import { db } from "./firebase-config.js";
 
-const db = getFirestore();
-const stockRef = collection(db, "stock");
-const salesRef = collection(db, "sales");
+const stockForm = document.getElementById("stock-form");
+const billingForm = document.getElementById("billing-form");
+const filterDate = document.getElementById("filter-date");
 
-const form = document.getElementById("stock-form");
-const nameInput = document.getElementById("item-name");
-const qtyInput = document.getElementById("item-qty");
-const purchaseInput = document.getElementById("item-purchase");
-const saleInput = document.getElementById("item-sale");
-const table = document.getElementById("stock-table");
+const itemNameInput = document.getElementById("item-name");
+const purchaseRateInput = document.getElementById("purchase-rate");
+const saleRateInput = document.getElementById("sale-rate");
+const quantityInput = document.getElementById("quantity");
 
-const billForm = document.getElementById("bill-form");
-const billName = document.getElementById("bill-item-name");
-const billQty = document.getElementById("bill-qty");
-const billRate = document.getElementById("bill-rate");
-const billDate = document.getElementById("bill-date");
-const invoiceDiv = document.getElementById("invoice");
+const billItemName = document.getElementById("bill-item-name");
+const billQtyInput = document.getElementById("bill-qty");
+const billOutput = document.getElementById("bill-output");
 
+const stockTable = document.getElementById("stock-table");
+const salesHistoryTable = document.getElementById("sales-history");
+
+let stockItems = {}; // in-memory cache for fast billing
+
+// Load and display stock data
 async function loadStock() {
-  table.innerHTML = "";
-  const snapshot = await getDocs(orderBy(stockRef, "timestamp", "desc"));
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
+  const snapshot = await getDocs(collection(db, "stock"));
+  stockTable.innerHTML = "";
+  billItemName.innerHTML = "";
+  stockItems = {};
+
+  snapshot.forEach(docSnap => {
+    const item = docSnap.data();
+    stockItems[docSnap.id] = { id: docSnap.id, ...item };
+
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${data.name}</td>
-      <td>${data.qty}</td>
-      <td>${data.purchase}</td>
-      <td>${data.sale}</td>
+      <td>${item.name}</td>
+      <td>${item.purchaseRate}</td>
+      <td>${item.saleRate}</td>
+      <td>${item.quantity}</td>
       <td><button onclick="deleteItem('${docSnap.id}')">Delete</button></td>
     `;
-    table.appendChild(row);
+    stockTable.appendChild(row);
+
+    const option = document.createElement("option");
+    option.value = docSnap.id;
+    option.textContent = item.name;
+    billItemName.appendChild(option);
   });
 }
 
+// Add or update stock
+stockForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = itemNameInput.value.trim();
+  const purchaseRate = parseFloat(purchaseRateInput.value);
+  const saleRate = parseFloat(saleRateInput.value);
+  const quantity = parseInt(quantityInput.value);
+
+  if (!name || isNaN(purchaseRate) || isNaN(saleRate) || isNaN(quantity)) return;
+
+  let existing = null;
+  for (const id in stockItems) {
+    if (stockItems[id].name.toLowerCase() === name.toLowerCase()) {
+      existing = stockItems[id];
+      break;
+    }
+  }
+
+  if (existing) {
+    await updateDoc(doc(db, "stock", existing.id), {
+      quantity: existing.quantity + quantity,
+      purchaseRate,
+      saleRate,
+      updatedAt: serverTimestamp()
+    });
+  } else {
+    await addDoc(collection(db, "stock"), {
+      name,
+      purchaseRate,
+      saleRate,
+      quantity,
+      createdAt: serverTimestamp()
+    });
+  }
+
+  itemNameInput.value = "";
+  purchaseRateInput.value = "";
+  saleRateInput.value = "";
+  quantityInput.value = "";
+  await loadStock();
+});
+
+// Delete stock item
 async function deleteItem(id) {
-  if (confirm("Delete this item?")) {
-    await deleteDoc(doc(stockRef, id));
-    loadStock();
+  if (confirm("Are you sure you want to delete this item?")) {
+    await deleteDoc(doc(db, "stock", id));
+    await loadStock();
   }
 }
 
-form.addEventListener("submit", async (e) => {
+// Billing
+billingForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const name = nameInput.value.trim();
-  const qty = parseInt(qtyInput.value);
-  const purchase = parseFloat(purchaseInput.value);
-  const sale = parseFloat(saleInput.value);
-  if (!name || qty <= 0 || isNaN(purchase) || isNaN(sale)) return;
 
-  const existing = await getDocs(query(stockRef, where("name", "==", name)));
-  if (!existing.empty) {
-    const docSnap = existing.docs[0];
-    const newQty = docSnap.data().qty + qty;
-    await updateDoc(doc(stockRef, docSnap.id), { qty: newQty });
-  } else {
-    await addDoc(stockRef, { name, qty, purchase, sale, timestamp: serverTimestamp() });
-  }
-  form.reset();
-  loadStock();
-});
+  const itemId = billItemName.value;
+  const quantity = parseInt(billQtyInput.value);
+  const item = stockItems[itemId];
+  if (!item || isNaN(quantity) || quantity <= 0 || quantity > item.quantity) return;
 
-billForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = billName.value.trim();
-  const qty = parseInt(billQty.value);
-  const rate = parseFloat(billRate.value);
-  const date = billDate.value;
-  if (!name || qty <= 0 || isNaN(rate)) return;
+  const total = item.saleRate * quantity;
+  const date = new Date().toISOString().slice(0, 10);
 
-  const qSnap = await getDocs(query(stockRef, where("name", "==", name)));
-  if (qSnap.empty) return alert("Item not in stock");
+  // Update stock
+  await updateDoc(doc(db, "stock", itemId), {
+    quantity: item.quantity - quantity
+  });
 
-  const docSnap = qSnap.docs[0];
-  const availableQty = docSnap.data().qty;
-  if (qty > availableQty) return alert("Not enough stock");
+  // Save bill to DB
+  await addDoc(collection(db, "sales"), {
+    name: item.name,
+    qty: quantity,
+    total,
+    date,
+    createdAt: serverTimestamp()
+  });
 
-  await updateDoc(doc(stockRef, docSnap.id), { qty: availableQty - qty });
-  await addDoc(salesRef, { name, qty, rate, date, timestamp: serverTimestamp() });
-
-  invoiceDiv.innerHTML = `
-    <h3>Invoice</h3>
-    <p><strong>Date:</strong> ${date}</p>
-    <p><strong>Item:</strong> ${name}</p>
-    <p><strong>Quantity:</strong> ${qty}</p>
-    <p><strong>Rate:</strong> ${rate}</p>
-    <p><strong>Total:</strong> ${qty * rate}</p>
+  billOutput.innerHTML = `
+    <div id="invoice">
+      <h2>Invoice</h2>
+      <p><strong>Date:</strong> ${date}</p>
+      <p><strong>Item:</strong> ${item.name}</p>
+      <p><strong>Quantity:</strong> ${quantity}</p>
+      <p><strong>Rate:</strong> ${item.saleRate}</p>
+      <p><strong>Total:</strong> ${total}</p>
+      <button onclick="window.print()">🖨️ Print</button>
+    </div>
   `;
 
-  window.print();
-  billForm.reset();
-  loadStock();
+  billQtyInput.value = "";
+  await loadStock();
+  await loadSalesHistory();
 });
 
-window.onload = loadStock;
+// Load sales history
+async function loadSalesHistory() {
+  const salesRef = collection(db, "sales");
+  let q = salesRef;
+  const filter = filterDate.value;
+  if (filter) q = query(salesRef, where("date", "==", filter));
+
+  const snapshot = await getDocs(q);
+  salesHistoryTable.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${data.date}</td>
+      <td>${data.name}</td>
+      <td>${data.qty}</td>
+      <td>${data.total}</td>
+    `;
+    salesHistoryTable.appendChild(row);
+  });
+}
+
+// Initial Load
+loadStock();
+loadSalesHistory();
