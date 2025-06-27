@@ -3,7 +3,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-// Your Firebase project config
+// Your Firebase project configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBbnsRkO-vDFENo0bvlRhz2mWUx__c_m80",
   authDomain: "hardwarestock-84447.firebaseapp.com",
@@ -14,6 +14,8 @@ const firebaseConfig = {
   measurementId: "G-47W205FW1S"
 };
 
-// Initialize Firebase
+// Initialize Firebase App
 const app = initializeApp(firebaseConfig);
+
+// Initialize and export Firestore database
 export const db = getFirestore(app);
