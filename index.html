@@ -10,6 +10,7 @@
   <div class="container">
     <h1>Stock & Billing Manager</h1>
 
+    <!-- Add Stock Section -->
     <section>
       <h2>Add Stock Item</h2>
       <form id="stock-form">
@@ -21,6 +22,7 @@
       </form>
     </section>
 
+    <!-- Stock Table -->
     <section>
       <h2>Current Stock</h2>
       <table>
@@ -37,6 +39,7 @@
       </table>
     </section>
 
+    <!-- Billing Section -->
     <section>
       <h2>Billing</h2>
       <form id="billing-form">
@@ -49,6 +52,7 @@
       <div id="bill-output" class="bill"></div>
     </section>
 
+    <!-- Sales History Section -->
     <section>
       <h2>Sales History</h2>
       <input type="date" id="filter-date" />
@@ -64,7 +68,7 @@
 
   <!-- Firebase Config -->
   <script type="module" src="firebase-config.js"></script>
-  <!-- Main Logic -->
+  <!-- App Logic -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
