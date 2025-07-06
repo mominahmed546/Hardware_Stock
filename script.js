@@ -14,7 +14,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const billingForm = document.getElementById("billing-form");
   const customerNameInput = document.getElementById("customer-name");
-  const billItemsContainer = document.getElementById("bill-items-container");
+  const billItemsContainer = document.getElementById("bill-items"); // ✅ fixed ID
   const addBillItemBtn = document.getElementById("add-bill-item");
   const billOutput = document.getElementById("bill-output");
 
@@ -28,7 +28,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const snap = await getDocs(collection(db, "stock"));
     stockTable.innerHTML = "";
     stockItems = {};
-    billItemsContainer.innerHTML = ""; // reset billing items
+    billItemsContainer.innerHTML = ""; // Reset billing
 
     snap.forEach(docSnap => {
       const data = docSnap.data();
@@ -45,7 +45,7 @@ window.addEventListener("DOMContentLoaded", () => {
       `);
     });
 
-    createBillItemRow(); // always add 1 row
+    createBillItemRow();
   }
 
   // Add/Update Stock
@@ -89,7 +89,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Create a billing row
+  // Create billing row
   function createBillItemRow() {
     const row = document.createElement("div");
     row.className = "bill-row";
@@ -196,7 +196,7 @@ window.addEventListener("DOMContentLoaded", () => {
     await loadSalesHistory();
   });
 
-  // Sales History
+  // Load Sales History
   window.loadSalesHistory = async () => {
     const dateVal = filterDateInput.value;
     let q = collection(db, "sales");
@@ -213,10 +213,10 @@ window.addEventListener("DOMContentLoaded", () => {
       salesHistoryTable.insertAdjacentHTML("beforeend", `
         <tr>
           <td>${d.date}</td>
+          <td>${d.customer || ''}</td>
           <td>${d.name}</td>
           <td>${d.qty}</td>
           <td>${d.total}</td>
-          <td>${d.customer || ''}</td>
         </tr>
       `);
     });
