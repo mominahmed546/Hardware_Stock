@@ -1,173 +1,66 @@
-/* Reset & Base */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f6f9;
-  color: #333;
-  padding: 0;
-  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f5f5f5;
+  padding: 30px;
 }
 
-/* Container Layout */
-.container {
-  width: 100%;
-  max-width: 100%;
-  padding: 30px 40px;
-  background: white;
-  border-radius: 10px;
+.ledger-container {
+  max-width: 1000px;
   margin: auto;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  overflow-x: auto;
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
 
-/* Headings */
-h1, h2 {
-  text-align: center;
+form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
   margin-bottom: 20px;
-  color: #2c3e50;
 }
 
-/* Form Inputs */
-form input, form select {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+form input, form button {
+  padding: 10px;
   font-size: 16px;
 }
 
-/* Buttons */
-button {
-  background: #007bff;
+form button {
+  background-color: #007bff;
   color: white;
-  padding: 10px 18px;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s ease;
-  margin-right: 8px;
 }
 
-button:hover {
-  background: #0056b3;
+form button:hover {
+  background-color: #0056b3;
 }
 
-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-/* Table Styling */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
 }
 
 th, td {
-  border: 1px solid #ddd;
-  padding: 10px;
+  padding: 12px;
   text-align: center;
+  border-bottom: 1px solid #ddd;
 }
 
 th {
-  background-color: #f1f1f1;
-  font-weight: bold;
+  background-color: #007BFF;
+  color: white;
 }
 
-/* Billing Section */
-.bill {
-  margin-top: 20px;
-  padding: 15px;
-  background: #e9f7ef;
-  border-left: 5px solid #2ecc71;
-  border-radius: 6px;
+tr:hover {
+  background-color: #f9f9f9;
 }
 
-/* Responsive Table */
-.responsive-table {
-  overflow-x: auto;
-  margin-bottom: 20px;
+.credit {
+  color: green;
 }
 
-/* Billing Row */
-.bill-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  align-items: center;
-}
-
-.bill-row select,
-.bill-row input {
-  flex: 1;
-}
-
-.bill-row button.remove-bill-item {
-  background: #e74c3c;
-  padding: 8px 14px;
-  font-size: 18px;
-  line-height: 1;
-}
-
-/* Add Item Button */
-#add-bill-item {
-  margin-bottom: 15px;
-  background: #28a745;
-}
-
-#add-bill-item:hover {
-  background: #218838;
-}
-
-/* Invoice Section */
-#invoice {
-  margin-top: 20px;
-  background: #fff3cd;
-  padding: 15px;
-  border-left: 5px solid #ffc107;
-  border-radius: 5px;
-}
-
-#invoice h2 {
-  margin-bottom: 10px;
-  color: #856404;
-}
-
-#invoice button {
-  margin-top: 10px;
-  background: #343a40;
-}
-
-#invoice button:hover {
-  background: #1d2124;
-}
-
-/* Media Queries for Mobile */
-@media screen and (max-width: 768px) {
-  .container {
-    padding: 20px 15px;
-  }
-
-  .bill-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  button {
-    width: 100%;
-    margin-bottom: 10px;
-  }
-
-  form input, form select {
-    font-size: 15px;
-  }
+.debit {
+  color: red;
 }
