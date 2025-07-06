@@ -5,7 +5,6 @@ import {
 import { db } from "./firebase-config.js";
 
 window.addEventListener("DOMContentLoaded", () => {
-  // Stock form elements
   const stockForm = document.getElementById("stock-form");
   const itemName = document.getElementById("item-name");
   const purchaseRate = document.getElementById("purchase-rate");
@@ -13,32 +12,27 @@ window.addEventListener("DOMContentLoaded", () => {
   const quantity = document.getElementById("quantity");
   const stockTable = document.getElementById("stock-table");
 
-  // Billing elements
   const billingForm = document.getElementById("billing-form");
-  const billDropdown = document.getElementById("bill-item-name");
-  const billQty = document.getElementById("bill-qty");
+  const billItemsContainer = document.getElementById("bill-items-container");
+  const addBillItemBtn = document.getElementById("add-bill-item");
   const billOutput = document.getElementById("bill-output");
 
-  // Sales history elements
   const filterDateInput = document.getElementById("filter-date");
   const salesHistoryTable = document.getElementById("sales-history");
 
   let stockItems = {};
 
-  // Load stock and update billing dropdown
+  // Load Stock
   async function loadStock() {
     const snap = await getDocs(collection(db, "stock"));
     stockTable.innerHTML = "";
     stockItems = {};
-
-    // Clear billing dropdown
-    billDropdown.innerHTML = '<option value="">Select Item</option>';
+    billItemsContainer.innerHTML = ""; // reset billing items
 
     snap.forEach(docSnap => {
       const data = docSnap.data();
       stockItems[docSnap.id] = { id: docSnap.id, ...data };
 
-      // Populate stock table
       stockTable.insertAdjacentHTML("beforeend", `
         <tr>
           <td>${data.name}</td>
@@ -48,25 +42,23 @@ window.addEventListener("DOMContentLoaded", () => {
           <td><button onclick="deleteStock('${docSnap.id}')">Delete</button></td>
         </tr>
       `);
-
-      // Populate billing dropdown
-      const option = document.createElement("option");
-      option.value = docSnap.id;
-      option.textContent = data.name;
-      billDropdown.appendChild(option);
     });
+
+    createBillItemRow(); // always add 1 row
   }
 
-  // Submit stock form
+  // Add/Update Stock
   stockForm.addEventListener("submit", async e => {
     e.preventDefault();
     const name = itemName.value.trim();
     const pr = parseFloat(purchaseRate.value);
     const sr = parseFloat(saleRate.value);
     const qty = parseInt(quantity.value);
+
     if (!name || isNaN(pr) || isNaN(sr) || isNaN(qty)) return;
 
     const existing = Object.values(stockItems).find(i => i.name.toLowerCase() === name.toLowerCase());
+
     if (existing) {
       await updateDoc(doc(db, "stock", existing.id), {
         purchaseRate: pr,
@@ -88,7 +80,7 @@ window.addEventListener("DOMContentLoaded", () => {
     await loadStock();
   });
 
-  // Delete stock item
+  // Delete Stock
   window.deleteStock = async id => {
     if (confirm("Delete this item?")) {
       await deleteDoc(doc(db, "stock", id));
@@ -96,60 +88,119 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Submit billing form
+  // Create a single billing item row
+  function createBillItemRow() {
+    const row = document.createElement("div");
+    row.className = "bill-row";
+
+    const select = document.createElement("select");
+    select.className = "bill-item-select";
+    select.innerHTML = '<option value="">Select item</option>';
+    Object.values(stockItems).forEach(item => {
+      const opt = document.createElement("option");
+      opt.value = item.id;
+      opt.textContent = item.name;
+      select.appendChild(opt);
+    });
+
+    const qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.className = "bill-qty";
+    qtyInput.placeholder = "Qty";
+    qtyInput.min = 1;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.textContent = "×";
+    removeBtn.onclick = () => row.remove();
+
+    row.append(select, qtyInput, removeBtn);
+    billItemsContainer.appendChild(row);
+  }
+
+  // Add row on button click
+  addBillItemBtn.onclick = createBillItemRow;
+
+  // Handle Billing
   billingForm.addEventListener("submit", async e => {
     e.preventDefault();
-    const itemId = billDropdown.value;
-    const qtyVal = parseInt(billQty.value);
-    if (!itemId || isNaN(qtyVal) || qtyVal < 1) return;
+    const rows = billItemsContainer.querySelectorAll(".bill-row");
+    const date = new Date().toLocaleDateString();
+    let total = 0;
+    const saleRecords = [];
 
-    const item = stockItems[itemId];
-    if (qtyVal > item.quantity) {
-      alert(`Not enough stock for ${item.name}`);
-      return;
+    for (const row of rows) {
+      const select = row.querySelector(".bill-item-select");
+      const qtyInput = row.querySelector(".bill-qty");
+
+      const itemId = select.value;
+      const qty = parseInt(qtyInput.value);
+
+      if (!itemId || isNaN(qty) || qty < 1) continue;
+
+      const item = stockItems[itemId];
+
+      if (qty > item.quantity) {
+        alert(`Not enough stock for ${item.name}`);
+        return;
+      }
+
+      const amount = item.saleRate * qty;
+      total += amount;
+
+      saleRecords.push({ item, qty, amount });
     }
 
-    const amount = item.saleRate * qtyVal;
-    const date = new Date().toLocaleDateString();
+    if (!saleRecords.length) return;
 
-    // Update stock
-    await updateDoc(doc(db, "stock", item.id), {
-      quantity: item.quantity - qtyVal,
-      updatedAt: serverTimestamp()
-    });
+    // Perform DB updates
+    for (const record of saleRecords) {
+      await updateDoc(doc(db, "stock", record.item.id), {
+        quantity: record.item.quantity - record.qty,
+        updatedAt: serverTimestamp()
+      });
 
-    // Add sales record
-    await addDoc(collection(db, "sales"), {
-      name: item.name,
-      qty: qtyVal,
-      total: amount,
-      date,
-      createdAt: serverTimestamp()
-    });
+      await addDoc(collection(db, "sales"), {
+        name: record.item.name,
+        qty: record.qty,
+        total: record.amount,
+        date,
+        createdAt: serverTimestamp()
+      });
+    }
 
-    // Show bill output
+    // Render Invoice
     billOutput.innerHTML = `
       <div id="invoice">
         <h2>Invoice</h2>
         <p><strong>Date:</strong> ${date}</p>
-        <p>${item.name} × ${qtyVal} @ ${item.saleRate} = ${amount}</p>
-        <h3>Total: ${amount}</h3>
+        ${saleRecords.map(r =>
+          `<p>${r.item.name} × ${r.qty} @ ${r.item.saleRate} = ${r.amount}</p>`
+        ).join('')}
+        <h3>Total: ${total}</h3>
         <button onclick="window.print()">🖨️ Print</button>
       </div>
     `;
 
     billingForm.reset();
+    billItemsContainer.innerHTML = "";
+    createBillItemRow();
     await loadStock();
     await loadSalesHistory();
   });
 
-  // Load sales history
+  // Load Sales History
   window.loadSalesHistory = async () => {
     const dateVal = filterDateInput.value;
     let q = collection(db, "sales");
-    if (dateVal) q = query(q, where("date", "==", dateVal));
+
+    if (dateVal) {
+      q = query(q, where("date", "==", dateVal));
+    }
+
     const snap = await getDocs(q);
     salesHistoryTable.innerHTML = "";
+
     snap.forEach(docSnap => {
       const d = docSnap.data();
       salesHistoryTable.insertAdjacentHTML("beforeend", `
@@ -163,7 +214,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  // Initial load
+  // Initial Load
   loadStock();
   loadSalesHistory();
 });

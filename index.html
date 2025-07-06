@@ -40,17 +40,16 @@
     </section>
 
     <!-- Billing Section -->
-    <section>
-      <h2>Billing</h2>
-      <form id="billing-form">
-        <select id="bill-item-name" required>
-          <option value="">Select Item</option>
-        </select>
-        <input type="number" id="bill-qty" placeholder="Quantity" required />
-        <button type="submit">Generate Bill</button>
-      </form>
-      <div id="bill-output" class="bill"></div>
-    </section>
+  <section>
+  <h2>Billing</h2>
+  <form id="billing-form">
+    <div id="bill-items-container"></div>
+    <button type="button" id="add-bill-item">+ Add Item</button>
+    <button type="submit">Generate Bill</button>
+  </form>
+  <div id="bill-output" class="bill"></div>
+</section>
+
 
     <!-- Sales History Section -->
     <section>
