@@ -13,6 +13,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const stockTable = document.getElementById("stock-table");
 
   const billingForm = document.getElementById("billing-form");
+  const customerNameInput = document.getElementById("customer-name");
   const billItemsContainer = document.getElementById("bill-items-container");
   const addBillItemBtn = document.getElementById("add-bill-item");
   const billOutput = document.getElementById("bill-output");
@@ -88,7 +89,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Create a single billing item row
+  // Create a billing row
   function createBillItemRow() {
     const row = document.createElement("div");
     row.className = "bill-row";
@@ -118,12 +119,18 @@ window.addEventListener("DOMContentLoaded", () => {
     billItemsContainer.appendChild(row);
   }
 
-  // Add row on button click
   addBillItemBtn.onclick = createBillItemRow;
 
-  // Handle Billing
+  // Billing Submission
   billingForm.addEventListener("submit", async e => {
     e.preventDefault();
+
+    const customerName = customerNameInput.value.trim();
+    if (!customerName) {
+      alert("Please enter customer name.");
+      return;
+    }
+
     const rows = billItemsContainer.querySelectorAll(".bill-row");
     const date = new Date().toLocaleDateString();
     let total = 0;
@@ -153,7 +160,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (!saleRecords.length) return;
 
-    // Perform DB updates
     for (const record of saleRecords) {
       await updateDoc(doc(db, "stock", record.item.id), {
         quantity: record.item.quantity - record.qty,
@@ -164,16 +170,17 @@ window.addEventListener("DOMContentLoaded", () => {
         name: record.item.name,
         qty: record.qty,
         total: record.amount,
+        customer: customerName,
         date,
         createdAt: serverTimestamp()
       });
     }
 
-    // Render Invoice
     billOutput.innerHTML = `
       <div id="invoice">
         <h2>Invoice</h2>
         <p><strong>Date:</strong> ${date}</p>
+        <p><strong>Customer:</strong> ${customerName}</p>
         ${saleRecords.map(r =>
           `<p>${r.item.name} × ${r.qty} @ ${r.item.saleRate} = ${r.amount}</p>`
         ).join('')}
@@ -189,7 +196,7 @@ window.addEventListener("DOMContentLoaded", () => {
     await loadSalesHistory();
   });
 
-  // Load Sales History
+  // Sales History
   window.loadSalesHistory = async () => {
     const dateVal = filterDateInput.value;
     let q = collection(db, "sales");
@@ -209,6 +216,7 @@ window.addEventListener("DOMContentLoaded", () => {
           <td>${d.name}</td>
           <td>${d.qty}</td>
           <td>${d.total}</td>
+          <td>${d.customer || ''}</td>
         </tr>
       `);
     });

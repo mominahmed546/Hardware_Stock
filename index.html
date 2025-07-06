@@ -42,11 +42,13 @@
     <!-- Billing Section -->
   <section>
   <h2>Billing</h2>
-  <form id="billing-form">
-    <div id="bill-items-container"></div>
-    <button type="button" id="add-bill-item">+ Add Item</button>
-    <button type="submit">Generate Bill</button>
-  </form>
+ <form id="billing-form">
+  <input type="text" id="customer-name" placeholder="Customer Name" required />
+  <div id="bill-items-container"></div>
+  <button type="button" id="add-bill-item">+ Add Item</button>
+  <button type="submit">Generate Bill</button>
+</form>
+
   <div id="bill-output" class="bill"></div>
 </section>
 
@@ -58,7 +60,10 @@
       <button onclick="loadSalesHistory()">Filter</button>
       <table>
         <thead>
-          <tr><th>Date</th><th>Item</th><th>Qty</th><th>Total</th></tr>
+        <tr>
+  <th>Date</th><th>Item</th><th>Qty</th><th>Total</th><th>Customer</th>
+</tr>
+
         </thead>
         <tbody id="sales-history"></tbody>
       </table>
