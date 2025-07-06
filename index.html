@@ -10,7 +10,6 @@
   <div class="container">
     <h1>Stock & Billing Manager</h1>
 
-    <!-- Add Stock Section -->
     <section>
       <h2>Add Stock Item</h2>
       <form id="stock-form">
@@ -22,57 +21,53 @@
       </form>
     </section>
 
-    <!-- Stock Table -->
     <section>
       <h2>Current Stock</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>Purchase Rate</th>
-            <th>Sale Rate</th>
-            <th>Qty</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="stock-table"></tbody>
-      </table>
+      <div class="responsive-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Purchase Rate</th>
+              <th>Sale Rate</th>
+              <th>Qty</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="stock-table"></tbody>
+        </table>
+      </div>
     </section>
 
-    <!-- Billing Section -->
-  <section>
-  <h2>Billing</h2>
- <form id="billing-form">
-  <input type="text" id="customer-name" placeholder="Customer Name" required />
-  <div id="bill-items-container"></div>
-  <button type="button" id="add-bill-item">+ Add Item</button>
-  <button type="submit">Generate Bill</button>
-</form>
+    <section>
+      <h2>Billing</h2>
+      <form id="billing-form">
+        <input type="text" id="customer-name" placeholder="Customer Name" required />
+        <div id="bill-items"></div>
+        <button type="button" id="add-bill-item">+ Add Item</button>
+        <button type="submit">Generate Bill</button>
+      </form>
+      <div id="bill-output" class="bill"></div>
+    </section>
 
-  <div id="bill-output" class="bill"></div>
-</section>
-
-
-    <!-- Sales History Section -->
     <section>
       <h2>Sales History</h2>
       <input type="date" id="filter-date" />
       <button onclick="loadSalesHistory()">Filter</button>
-      <table>
-        <thead>
-        <tr>
-  <th>Date</th><th>Item</th><th>Qty</th><th>Total</th><th>Customer</th>
-</tr>
-
-        </thead>
-        <tbody id="sales-history"></tbody>
-      </table>
+      <div class="responsive-table">
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Customer</th><th>Item</th><th>Qty</th><th>Total</th></tr>
+          </thead>
+          <tbody id="sales-history"></tbody>
+        </table>
+      </div>
     </section>
   </div>
 
   <!-- Firebase Config -->
   <script type="module" src="firebase-config.js"></script>
-  <!-- App Logic -->
+  <!-- Main Logic -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
