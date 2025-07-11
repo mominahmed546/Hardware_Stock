@@ -255,9 +255,9 @@ function openInvoiceTab(invoiceData) {
     </head>
     <body>
       <div id="invoice-content">
-        <h2>Riaz Sons Hardware</h2>
-        <h3>Ch Meharban Arcade, Opp Shell Pump, High Court Rd, Rwp</h3>
-        <p>NTN Ref #7202458-1 | Since: 22-Mar-2016 | Ph: 0315-50 333 56</p>
+        <h2>Hardware</h2>
+        <h3>Office no.316 St 5A sardar plaza gulraiz Ph-II, High Court Rd, Rwp</h3>
+        <p> Ph: 0300-5411417 | 0300-4339933</p>
         <p><strong>Date:</strong> ${invoiceData.date} | <strong>Time:</strong> ${invoiceData.time}</p>
         <p><strong>Customer:</strong> ${invoiceData.customer} | <strong>Sale ID:</strong> ${invoiceData.saleId}</p>
 
