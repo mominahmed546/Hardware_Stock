@@ -171,13 +171,16 @@ window.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // 🔁 Get previous balance from ledger
+    // 🔁 Get previous balance from ledger (for specific customer)
     let previousBalance = 0;
-    const ledgerSnap = await getDocs(collection(db, "ledger"));
+    const ledgerSnap = await getDocs(query(collection(db, "ledger"), where("account", "==", customerName)));
     ledgerSnap.forEach(doc => {
-      const data = doc.data();
-      previousBalance += (data.debit || 0) - (data.credit || 0);
-    });
+  const data = doc.data();
+  if ((data.account || '').toLowerCase() === customerName.toLowerCase()) {
+    previousBalance += (data.debit || 0) - (data.credit || 0);
+  }
+});
+
 
     // 🧾 Prepare invoice data
     const now = new Date();
@@ -235,7 +238,6 @@ window.addEventListener("DOMContentLoaded", () => {
   loadSalesHistory();
 });
 
-// ✅ OPEN INVOICE TAB FUNCTION WITH PRINT & PDF
 function openInvoiceTab(invoiceData) {
   const newTab = window.open('', '_blank');
   newTab.document.write(`
