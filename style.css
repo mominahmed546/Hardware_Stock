@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -171,7 +171,6 @@ th {
     font-size: 15px;
   }
 }
-=======
 body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #f5f5f5;
@@ -238,4 +237,3 @@ tr:hover {
 .debit {
   color: red;
 }
->>>>>>> f8a9693d4f5106928a338d98795ab343fe085e5a

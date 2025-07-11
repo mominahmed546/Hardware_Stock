@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import {
   collection, getDocs, addDoc, doc,
   updateDoc, deleteDoc, query, where, serverTimestamp
@@ -15,7 +14,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const billingForm = document.getElementById("billing-form");
   const customerNameInput = document.getElementById("customer-name");
-  const billItemsContainer = document.getElementById("bill-items"); // ✅ fixed ID
+  const billItemsContainer = document.getElementById("bill-items");
   const addBillItemBtn = document.getElementById("add-bill-item");
   const billOutput = document.getElementById("bill-output");
 
@@ -24,12 +23,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   let stockItems = {};
 
-  // Load Stock
   async function loadStock() {
     const snap = await getDocs(collection(db, "stock"));
     stockTable.innerHTML = "";
     stockItems = {};
-    billItemsContainer.innerHTML = ""; // Reset billing
+    billItemsContainer.innerHTML = "";
 
     snap.forEach(docSnap => {
       const data = docSnap.data();
@@ -49,7 +47,6 @@ window.addEventListener("DOMContentLoaded", () => {
     createBillItemRow();
   }
 
-  // Add/Update Stock
   stockForm.addEventListener("submit", async e => {
     e.preventDefault();
     const name = itemName.value.trim();
@@ -82,7 +79,6 @@ window.addEventListener("DOMContentLoaded", () => {
     await loadStock();
   });
 
-  // Delete Stock
   window.deleteStock = async id => {
     if (confirm("Delete this item?")) {
       await deleteDoc(doc(db, "stock", id));
@@ -90,7 +86,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Create billing row
   function createBillItemRow() {
     const row = document.createElement("div");
     row.className = "bill-row";
@@ -122,7 +117,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   addBillItemBtn.onclick = createBillItemRow;
 
-  // Billing Submission
   billingForm.addEventListener("submit", async e => {
     e.preventDefault();
 
@@ -177,18 +171,33 @@ window.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    billOutput.innerHTML = `
-      <div id="invoice">
-        <h2>Invoice</h2>
-        <p><strong>Date:</strong> ${date}</p>
-        <p><strong>Customer:</strong> ${customerName}</p>
-        ${saleRecords.map(r =>
-          `<p>${r.item.name} × ${r.qty} @ ${r.item.saleRate} = ${r.amount}</p>`
-        ).join('')}
-        <h3>Total: ${total}</h3>
-        <button onclick="window.print()">🖨️ Print</button>
-      </div>
-    `;
+    // 🔁 Get previous balance from ledger
+    let previousBalance = 0;
+    const ledgerSnap = await getDocs(collection(db, "ledger"));
+    ledgerSnap.forEach(doc => {
+      const data = doc.data();
+      previousBalance += (data.debit || 0) - (data.credit || 0);
+    });
+
+    // 🧾 Prepare invoice data
+    const now = new Date();
+    const invoiceData = {
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString(),
+      customer: customerName,
+      saleId: `POS-${Math.floor(100000 + Math.random() * 900000)}`,
+      items: saleRecords.map(r => ({
+        name: r.item.name,
+        rate: r.item.saleRate,
+        qty: r.qty,
+        total: r.amount
+      })),
+      previousBalance,
+      totalBalance: previousBalance + total,
+      netTotal: previousBalance + total
+    };
+
+    openInvoiceTab(invoiceData);
 
     billingForm.reset();
     billItemsContainer.innerHTML = "";
@@ -197,7 +206,6 @@ window.addEventListener("DOMContentLoaded", () => {
     await loadSalesHistory();
   });
 
-  // Load Sales History
   window.loadSalesHistory = async () => {
     const dateVal = filterDateInput.value;
     let q = collection(db, "sales");
@@ -223,75 +231,78 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  // Initial Load
   loadStock();
   loadSalesHistory();
 });
-=======
-// ✅ Firebase Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDFsuh5kl95DYu6yS17OQHN2nJlQnx3aMo",
-  authDomain: "ledger-2729b.firebaseapp.com",
-  projectId: "ledger-2729b",
-  storageBucket: "ledger-2729b.appspot.com",
-  messagingSenderId: "249531697575",
-  appId: "1:249531697575:web:37f352ef65a7ecd126ce82",
-  measurementId: "G-1C11V1FQ0L"
-};
 
-// ✅ Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// ✅ OPEN INVOICE TAB FUNCTION WITH PRINT & PDF
+function openInvoiceTab(invoiceData) {
+  const newTab = window.open('', '_blank');
+  newTab.document.write(`
+    <html>
+    <head>
+      <title>Invoice</title>
+      <style>
+        body { font-family: Arial; padding: 20px; }
+        h2, h3 { text-align: center; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+        .total { font-weight: bold; text-align: right; margin-top: 10px; }
+        .footer { text-align: center; margin-top: 20px; font-style: italic; }
+        .download-btn { margin-top: 20px; text-align: center; }
+      </style>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    </head>
+    <body>
+      <div id="invoice-content">
+        <h2>Riaz Sons Hardware</h2>
+        <h3>Ch Meharban Arcade, Opp Shell Pump, High Court Rd, Rwp</h3>
+        <p>NTN Ref #7202458-1 | Since: 22-Mar-2016 | Ph: 0315-50 333 56</p>
+        <p><strong>Date:</strong> ${invoiceData.date} | <strong>Time:</strong> ${invoiceData.time}</p>
+        <p><strong>Customer:</strong> ${invoiceData.customer} | <strong>Sale ID:</strong> ${invoiceData.saleId}</p>
 
-let balance = 0;
+        <table>
+          <thead>
+            <tr><th>Product</th><th>Rate</th><th>Qty</th><th>Total</th></tr>
+          </thead>
+          <tbody>
+            ${invoiceData.items.map(item => `
+              <tr>
+                <td>${item.name}</td>
+                <td>${item.rate}</td>
+                <td>${item.qty}</td>
+                <td>${item.total}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
 
-// ✅ Load previous entries
-window.addEventListener("DOMContentLoaded", async () => {
-  const snapshot = await db.collection("ledger").orderBy("date").get();
-  snapshot.forEach(doc => {
-    const entry = doc.data();
-    balance += (entry.debit || 0) - (entry.credit || 0);
-    addRowToTable(entry.date, entry.account, entry.description, entry.debit, entry.credit, balance);
-  });
-});
+        <p class="total">Previous Balance: Rs.${invoiceData.previousBalance}</p>
+        <p class="total">Total Balance: Rs.${invoiceData.totalBalance}</p>
+        <h3 class="total">Net Total: Rs.${invoiceData.totalBalance}</h3>
 
-// ✅ Handle form submission
-document.getElementById("entry-form").addEventListener("submit", async function (e) {
-  e.preventDefault();
+        <div class="footer">Return Policy</div>
+        <div class="download-btn">
+          <button onclick="window.print()">🖨️ Print</button>
+          <button onclick="downloadPDF()">⬇️ Download PDF</button>
+        </div>
+      </div>
 
-  const date = document.getElementById("date").value;
-  const account = document.getElementById("account").value;
-  const description = document.getElementById("description").value;
-  const debit = parseFloat(document.getElementById("debit").value) || 0;
-  const credit = parseFloat(document.getElementById("credit").value) || 0;
-
-  balance += debit - credit;
-
-  const entry = { date, account, description, debit, credit, balance };
-
-  try {
-    await db.collection("ledger").add(entry);
-    addRowToTable(date, account, description, debit, credit, balance);
-    document.getElementById("entry-form").reset();
-  } catch (error) {
-    console.error("❌ Error adding entry:", error);
-  }
-});
-
-// ✅ Add row to table
-function addRowToTable(date, account, description, debit, credit, balance) {
-  const tbody = document.getElementById("ledger-body");
-  const row = document.createElement("tr");
-
-  row.innerHTML = `
-    <td>${date}</td>
-    <td>${account}</td>
-    <td>${description}</td>
-    <td class="debit">${debit > 0 ? debit.toLocaleString() : '—'}</td>
-    <td class="credit">${credit > 0 ? credit.toLocaleString() : '—'}</td>
-    <td>${balance.toLocaleString()}</td>
-  `;
-
-  tbody.appendChild(row);
+      <script>
+        function downloadPDF() {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          doc.html(document.getElementById('invoice-content'), {
+            callback: function (pdf) {
+              pdf.save('invoice-${invoiceData.saleId}.pdf');
+            },
+            x: 10,
+            y: 10
+          });
+        }
+      </script>
+    </body>
+    </html>
+  `);
+  newTab.document.close();
 }
->>>>>>> f8a9693d4f5106928a338d98795ab343fe085e5a
