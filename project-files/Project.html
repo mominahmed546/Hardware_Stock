@@ -4,6 +4,36 @@
   <meta charset="UTF-8" />
   <title>Interactive Ledger</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial;
+      margin: 20px;
+    }
+    .ledger-container {
+      max-width: 1000px;
+      margin: auto;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    .debit {
+      color: green;
+    }
+    .credit {
+      color: red;
+    }
+  </style>
 </head>
 <body>
   <div class="ledger-container">
@@ -27,10 +57,11 @@
           <th>Debit (PKR)</th>
           <th>Credit (PKR)</th>
           <th>Balance (PKR)</th>
+          <th>Action</th> <!-- ✅ New column for Delete -->
         </tr>
       </thead>
       <tbody id="ledger-body">
-        <!-- Entries appear here -->
+        <!-- Ledger entries will appear here -->
       </tbody>
     </table>
   </div>
@@ -39,14 +70,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-  <!-- ✅ Your logic -->
-  <script src="script.js"></script>
+  <!-- ✅ Ledger Logic -->
+  <script src="ledger.js"></script>
 </body>
-<!-- ✅ Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
-<!-- ✅ Your logic -->
-<script src="ledger.js"></script> <!-- New file for ledger -->
-
 </html>
